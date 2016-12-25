@@ -1,0 +1,188 @@
+---
+title: "econometrics hw6 陳靖雯 b04303131"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+#1_a
+```{r}
+getwd()
+setwd("C:/Users/warty/Documents/dsR/data")
+require(foreign)
+retro<-read.dta("C:/Users/warty/Documents/dsR/data/retro.dta")
+prosp<-read.dta("C:/Users/warty/Documents/dsR/data/prosp.dta")
+require(dplyr)
+attach(retro)
+
+re_nmsc_nona<-retro$nmsc[which(!is.na(retro$nmsc))]
+pr_nmsc_nona<-prosp$nmsc[which(!is.na(prosp$nmsc))]
+mean(re_nmsc_nona)
+mean(pr_nmsc_nona)
+sd(re_nmsc_nona)
+sd(pr_nmsc_nona)
+```
+#1_b
+##1_b.(i)(ii)
+```{r}
+retro<-mutate(retro,wc=wallchar/4)
+summary(lm(nmsc~wc,retro))
+summary(lm(nmsc~wc+schoolid+rain+bboard+bkpup+deskp+stalvl+classsz,retro))
+
+```
+#1_c
+```{r}
+retro<-mutate(retro,wcsub=ifelse(sub%in%c("eng","mat","sca","acm"),1,0 ))
+retro<-retro%>% mutate(wcdum=ifelse(wc==0,0,1))
+```
+
+##1_c.(i)
+```{r}
+levels(as.factor(retro$sub))
+
+```
+
+##1_c.(ii)
+```{r}
+yy<-filter(retro,wcsub==1&wcdum==1)
+yn<-filter(retro,wcsub==1&wcdum==0)
+ny<-filter(retro,wcsub==0&wcdum==1)
+nn<-filter(retro,wcsub==0&wcdum==0)
+mean_value<-function(x){
+  nmsc_nona_f<-x$nmsc[which(!is.na(x$nmsc))]
+  a<-mean(nmsc_nona_f)
+  return(a)
+}
+mean_value(yy)
+mean_value(yn)
+mean_value(ny)
+mean_value(nn)
+```
+
+
+#1_d
+##1_d.(i)
+```{r}
+
+wc_one<-filter(prosp,wc==1)
+which(is.na(wc_one$wc))
+mean_wallchar<-mean(wc_one$nmsc[which(!is.na(wc_one$nmsc))])
+mean_wallchar
+wc_zero<-filter(prosp,wc==0)
+mean_nowall<-mean(wc_zero$nmsc[which(!is.na(wc_zero$nmsc))])
+nmsc_nona<-filter(prosp,!is.na(prosp$nmsc))
+summary(lm(nmsc~wc,nmsc_nona))
+mean_wallchar-mean_nowall
+
+```
+##1_d.(ii)
+```{r}
+prosp<-mutate(prosp,wcsub=ifelse(sub%in%c("mat","sca","hsb","ghc"),1,0))
+ss<-filter(prosp,wc==1&wcsub==1)
+so<-filter(prosp,wc==1&wcsub==0)
+os<-filter(prosp,wc==0&wcsub==1)
+oo<-filter(prosp,wc==0&wcsub==0)
+
+mean_pro<-function(x){
+  bb<-x$nmsc[which(!is.na(x$nmsc))]
+  b<-mean(bb)
+  return(b)
+}
+mean_pro(ss)
+mean_pro(so)
+mean_pro(os)
+mean_pro(oo)
+```
+
+#2_b
+##2_b.(i)(ii)
+```{r}
+
+supas<-read.dta("C:/Users/warty/Documents/dsR/data/supas.dta")
+
+
+attach(supas)
+yy<-filter(supas,young==1&high==1)
+yn<-filter(supas,young==1&high==0)
+ny<-filter(supas,old==1&high==1)
+nn<-filter(supas,old==1&high==0)
+mean(yy$yeduc)
+mean(yn$yeduc)
+mean(ny$yeduc)
+mean(nn$yeduc)
+mean(yy$lhwage)
+mean(yn$lhwage)
+mean(ny$lhwage)
+mean(nn$lhwage)
+
+
+```
+
+
+
+
+#2_c
+##2_c.(i)(ii)
+```{r}
+
+
+
+
+for(i in c(1:23)){
+ a<-as.factor(levels(as.factor(supas$YOB))[i])
+  c<-mutate(supas,bname=ifelse(YOB%in%a,1,0))
+  names(c)[i+11]<-paste0("d",i+49)
+  supas<-c
+}
+
+for(i in c(1:11)){
+  b<-mutate(supas,bname=supas[,23+i]*prog_int)
+  names(b)[i+34]<-paste0("z",i+61)
+  supas<-b
+}
+
+aa<-paste0("yeduc~","ch71")
+
+for(i in c(1:23)){
+  a<-paste0("+d",i+49,"+ch71*d",i+49)
+  aa<-paste(aa,a)
+  
+}
+for(i in c(1:11)){
+  a<-paste0("+z",i+61)
+  aa<-paste0(aa,a)
+}
+summary(lm(as.formula(aa),supas))
+
+
+supas$instrumented.value<-lm(as.formula(aa),supas)$fitted.value
+bb<-paste("lhwage~instrumented.value+","ch71")
+for(i in c(1:23)){
+  b<-paste0("+d",i+49,"+ch71*d",i+49)
+  bb<-paste(bb,b)
+}
+bb
+
+summary(lm(as.formula(bb),supas))
+
+```
+
+
+
+
+
+test
+```{r}
+b<-paste0("YOB",1)
+names(supas[12])
+a<-summary(lm(supas[,4]~supas[,12]+supas[,13]+supas[,7]+supas[,12]*supas[,7]+supas[,13]*supas[,7],supas))$coefficient
+a
+b<-summary(lm(supas[,4]~supas[,12]+supas[,7]+supas[,12]*supas[,7],supas))$coefficient
+b
+c<-rbind(a,b)
+a<-paste("ch71~YOB")
+lm(as.formula(a),supas)
+lm(ch71~YOB,supas)
+unique(c)
+```
+
