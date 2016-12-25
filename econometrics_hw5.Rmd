@@ -1,0 +1,51 @@
+---
+title: "經濟系/二年級/b04303131/陳靖雯"
+output:
+  html_document: default
+  html_notebook: default
+---
+<font size=10 color=darkgreen>*經濟系*</font>
+ 
+ This is <font size=6 >[example](#hi)</font> inline link
+
+```{r}
+require(foreign)
+worms<-read.dta("C:/Users/warty/Documents/dsR/data/ted_miguel_worms.DTA")
+
+total<-length(worms$pupid)
+total
+require(dplyr)
+boy<-sum(filter(worms,sex==1)$sex)
+boy/total
+total_pill98<-sum(filter(worms,pill98==1)$pill98)
+total_pill98/total
+total_pill99<-sum(filter(worms,pill99==1)$pill99)
+total_pill99/total
+
+pill98_nona<-worms[!is.na(worms$pill98),]
+
+y_x1<-worms[which(!is.na(worms$totpar98)&!is.na(worms$pill98)),]%>%filter(pill98==1)%>%summarise(y_x1=sum(totpar98)/nrow(worms))
+y_x0<-worms[which(!is.na(worms$totpar98)&!is.na(worms$pill98)),]%>%filter(pill98==0)%>%summarise(y_x0=sum(totpar98)/nrow(worms))
+b1<-y_x1-y_x0
+b1
+
+y_z1<-worms[which(!is.na(worms$totpar98)&!is.na(worms$wgrp)),]%>%filter(wgrp==1)%>%summarise(y_z1=sum(totpar98)/nrow(worms))
+y_z0<-worms[which(!is.na(worms$totpar98)&!is.na(worms$wgrp)),]%>%filter(wgrp==c(2,3))%>%summarise(y_z0=sum(totpar98)/nrow(worms))
+b2<-y_z1-y_z0
+b2
+
+x_z1<-worms[which(!is.na(worms$pill98)&!is.na(worms$treat_sch98)),]%>%filter(treat_sch98==1)%>%summarise(x_z1=sum(pill98)/nrow(worms))
+x_z0<-worms[which(!is.na(worms$pill98)&!is.na(worms$treat_sch98)),]%>%filter(treat_sch98==0)%>%summarise(x_z0=sum(pill98)/nrow(worms))
+c<-x_z1-x_z0
+c
+d<-b2/c
+d
+```
+
+#HI
+```{r}
+e<-b1/c
+e
+```
+
+ 
