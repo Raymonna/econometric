@@ -1,0 +1,44 @@
+---
+title: "陳靖雯/經濟系二年級/b04303131"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+
+
+```{r}
+library(readxl)
+hw4<-read_excel("~/dsR/data/hw4.xls", skip = 4)
+hw4
+attach(hw4)
+hw4[1,]
+hh<-hw4
+hw4
+hh1<-subset(hh,YEAR<=1982)
+hh2<-subset(hh,YEAR>1982)
+lm_hh1<-lm(SAVINGS~INCOME,data=hh1)
+
+
+
+
+
+
+
+lm_hh2<-lm(SAVINGS~INCOME,hh2)
+lm_hh<-lm(SAVINGS~INCOME,hh)
+SSR<-lm_hh$residuals^2
+SSR
+SSR1<-lm_hh1$residuals^2
+
+
+SSR2<-lm_hh2$residuals^2
+K<-lm_hh$rank
+a<-(sum(SSR)-sum(SSR1)+sum(SSR2))/K
+b<-(sum(SSR1)+sum(SSR2))/(nrow(hh)-K*2)
+chow<-a/b
+pvalue<-pf(chow,K,nrow(hh)-K*2)
+pvalue
+```
+Because the p-value is too high to neglect the significance
+we conclude that there is a structure change
