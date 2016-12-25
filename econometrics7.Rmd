@@ -1,0 +1,82 @@
+---
+title: "econometrics7/ chen ching wen"
+output:
+  html_document: default
+  html_notebook: default
+tml_document:
+  toc: yes
+toc_float: yes
+---
+
+ 
+#1
+```{r}
+require(foreign)
+j<-read.dta("C:/Users/warty/Documents/dsR/data/JTRAIN.DTA")
+
+us<-read.dta("C:/Users/warty/Documents/dsR/data/ushouse_election.DTA")
+
+library(ggplot2)
+library(plotly)
+
+
+p<-ggplot(j,aes(x=year,y=hrsemp,fill=fcode))+geom_jitter()+geom_bar(stat="identity")
+ggplotly(p)
+
+library(plm)
+fixed<-plm(hrsemp~d88+d89+grant+grant_1+lemploy,data=j,index=c("fcode","year"),method="within")
+summary(fixed)
+length(levels(as.factor(j$fcode)))
+fixef(fixed)
+```
+#2
+```{r}
+
+require(plotly)
+require(rddtools)
+require(rdd)
+require(dplyr)
+attach(us)
+
+us<-mutate(us,win=ifelse(demvoteshare>=0.5,1,0))
+us<-us[-which(is.na(us$demvoteshare)),]
+first<-lm(win_dem_t1~win_dem+demvoteshare,data=us)
+summary(first)
+second<-lm(win_dem_t1~win_dem+polym(demvoteshare,degree = 2,raw=TRUE),us)
+summary(second)
+
+
+
+#house_rdd <- rdd_data(y=us$win_dem_t1, x=us$demvoteshare, cutpoint=0.5)
+#<-filter(us,demvoteshare<=0.5)
+#plot(house_rdd)+abline(lm(win_dem_t1~demvoteshare,ussmall),col="red")+abline(lm(win_dem_t1~demvoteshare,uslarge))
+#lm(win_dem_t1~polym(demvoteshare, degree=2, raW=TRUE),us)
+
+
+```
+```{r}
+
+require(rdrobust)
+rdbwselect(y=us$win_dem_t1, x=us$demvoteshare, covs = NULL, fuzzy = NULL, cluster = NULL,
+c = 0.5, p = 1, q = 2, deriv = 0, kernel = "tri", weights = NULL,
+bwselect = "mserd")
+
+rdplot(y=us$win_dem_t1, x=us$demvoteshare, subset = NULL, c = 0.5, p = 1, nbins = NULL, binselect = "qspr", scale = NULL,
+kernel = "uni", weights = NULL, h = NULL, hide = FALSE, ci = NULL,
+shade = FALSE, par = NULL, title = NULL, x.label = NULL, y.label = NULL,
+x.lim = NULL, y.lim = NULL, col.dots = NULL, col.lines = NULL,
+type.dots = NULL)
+
+
+rdplot(y=us$win_dem_t1, x=us$demvoteshare, subset = NULL, c = 0.5, p = 2, nbins = NULL, binselect = "qspr", scale = NULL,
+kernel = "uni", weights = NULL, h = NULL, hide = FALSE, ci = NULL,
+shade = FALSE, par = NULL, title = NULL, x.label = NULL, y.label = NULL,
+x.lim = NULL, y.lim = NULL, col.dots = NULL, col.lines = NULL,
+type.dots = NULL)
+
+
+
+````
+
+
+
